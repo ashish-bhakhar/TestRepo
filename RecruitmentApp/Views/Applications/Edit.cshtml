@@ -1,0 +1,56 @@
+@model RecruitmentApp.Models.Application
+@{
+    ViewData["Title"] = "Edit Application";
+}
+
+<div class="form-page">
+    <div class="form-card">
+        <div class="form-card-header">
+            <h2>Edit Application</h2>
+            <a asp-action="Index" class="btn-ghost">← Back to Applications</a>
+        </div>
+
+        <form asp-action="Edit" method="post">
+            @Html.AntiForgeryToken()
+            <input type="hidden" asp-for="Id" />
+            <input type="hidden" asp-for="AppliedDate" />
+            <div class="form-grid">
+                <div class="form-group">
+                    <label asp-for="JobPostingId" class="form-label">Job Posting</label>
+                    <select asp-for="JobPostingId" asp-items="ViewBag.Jobs" class="form-control"></select>
+                </div>
+                <div class="form-group">
+                    <label asp-for="CandidateId" class="form-label">Candidate</label>
+                    <select asp-for="CandidateId" asp-items="ViewBag.Candidates" class="form-control"></select>
+                </div>
+                <div class="form-group">
+                    <label asp-for="Status" class="form-label"></label>
+                    <select asp-for="Status" class="form-control">
+                        <option>Applied</option>
+                        <option>Under Review</option>
+                        <option>Interview</option>
+                        <option>Offered</option>
+                        <option>Hired</option>
+                        <option>Rejected</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label asp-for="InterviewDate" class="form-label"></label>
+                    <input asp-for="InterviewDate" type="datetime-local" class="form-control" />
+                </div>
+                <div class="form-group full">
+                    <label asp-for="CoverLetter" class="form-label"></label>
+                    <textarea asp-for="CoverLetter" class="form-control" rows="5"></textarea>
+                </div>
+                <div class="form-group full">
+                    <label asp-for="Notes" class="form-label"></label>
+                    <textarea asp-for="Notes" class="form-control" rows="3"></textarea>
+                </div>
+            </div>
+            <div class="form-actions">
+                <button type="submit" class="btn-primary">Save Changes</button>
+                <a asp-action="Index" class="btn-ghost">Cancel</a>
+            </div>
+        </form>
+    </div>
+</div>

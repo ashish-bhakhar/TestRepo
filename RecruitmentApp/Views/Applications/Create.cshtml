@@ -1,0 +1,69 @@
+@model RecruitmentApp.Models.Application
+@{
+    ViewData["Title"] = "New Application";
+}
+
+<div class="form-page">
+    <div class="form-card">
+        <div class="form-card-header">
+            <h2>New Application</h2>
+            <a asp-action="Index" class="btn-ghost">← Back to Applications</a>
+        </div>
+
+        <form asp-action="Create" method="post">
+            @Html.AntiForgeryToken()
+            @if (!ViewData.ModelState.IsValid)
+            {
+                <div class="alert-error">
+                    @foreach (var error in ViewData.ModelState.Values.SelectMany(v => v.Errors))
+                    {
+                        <div>@error.ErrorMessage</div>
+                    }
+                </div>
+            }
+            <div class="form-grid">
+                <div class="form-group">
+                    <label asp-for="JobPostingId" class="form-label">Job Posting</label>
+                    <select asp-for="JobPostingId" asp-items="ViewBag.Jobs" class="form-control">
+                        <option value="">-- Select Job --</option>
+                    </select>
+                    <span asp-validation-for="JobPostingId" class="field-error"></span>
+                </div>
+                <div class="form-group">
+                    <label asp-for="CandidateId" class="form-label">Candidate</label>
+                    <select asp-for="CandidateId" asp-items="ViewBag.Candidates" class="form-control">
+                        <option value="">-- Select Candidate --</option>
+                    </select>
+                    <span asp-validation-for="CandidateId" class="field-error"></span>
+                </div>
+                <div class="form-group">
+                    <label asp-for="Status" class="form-label"></label>
+                    <select asp-for="Status" class="form-control">
+                        <option>Applied</option>
+                        <option>Under Review</option>
+                        <option>Interview</option>
+                        <option>Offered</option>
+                        <option>Hired</option>
+                        <option>Rejected</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label asp-for="InterviewDate" class="form-label"></label>
+                    <input asp-for="InterviewDate" type="datetime-local" class="form-control" />
+                </div>
+                <div class="form-group full">
+                    <label asp-for="CoverLetter" class="form-label"></label>
+                    <textarea asp-for="CoverLetter" class="form-control" rows="5" placeholder="Paste candidate's cover letter here..."></textarea>
+                </div>
+                <div class="form-group full">
+                    <label asp-for="Notes" class="form-label"></label>
+                    <textarea asp-for="Notes" class="form-control" rows="3" placeholder="Internal notes about this application..."></textarea>
+                </div>
+            </div>
+            <div class="form-actions">
+                <button type="submit" class="btn-primary">Submit Application</button>
+                <a asp-action="Index" class="btn-ghost">Cancel</a>
+            </div>
+        </form>
+    </div>
+</div>

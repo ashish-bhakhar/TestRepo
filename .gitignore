@@ -46,6 +46,6 @@ Network Trash Folder
 Temporary Items
 .apdisk
 /.vs
-/RecruitmentApp/bin/Debug/net8.0/appsettings.Development.json
-/RecruitmentApp/obj/Debug/net8.0/RecruitmentApp.AssemblyInfo.cs
-/RecruitmentApp/obj/Release/net8.0/RecruitmentApp.GeneratedMSBuildEditorConfig.editorconfig
+/RecruitmentApp/bin
+/RecruitmentApp/obj
+/RecruitmentApp/obj
