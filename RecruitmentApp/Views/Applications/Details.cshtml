@@ -1,0 +1,118 @@
+@model RecruitmentApp.Models.Application
+@{
+    ViewData["Title"] = "Application Details";
+    var statuses = new[] { "Applied", "Under Review", "Interview", "Offered", "Hired", "Rejected" };
+}
+
+<div class="detail-page">
+    <div class="detail-header">
+        <div class="detail-title-group">
+            <h1 class="detail-title">@Model.Candidate?.FullName</h1>
+            <div class="detail-meta">
+                <span class="text-muted">applied for</span>
+                <span class="tag">@Model.JobPosting?.Title</span>
+                <span class="badge badge-@Model.Status.ToLower().Replace(" ", "-")">@Model.Status</span>
+            </div>
+        </div>
+        <div class="detail-actions">
+            <a asp-action="Edit" asp-route-id="@Model.Id" class="btn-primary">Edit Application</a>
+        </div>
+    </div>
+
+    <!-- Quick Status Update -->
+    <div class="status-pipeline">
+        @foreach (var status in statuses)
+        {
+            var isActive = Model.Status == status;
+            <form asp-action="UpdateStatus" method="post" style="display:inline">
+                @Html.AntiForgeryToken()
+                <input type="hidden" name="id" value="@Model.Id" />
+                <input type="hidden" name="status" value="@status" />
+                <button type="submit" class="pipeline-step @(isActive ? "active" : "")">@status</button>
+            </form>
+        }
+    </div>
+
+    <div class="detail-grid">
+        <div class="detail-main">
+            @if (!string.IsNullOrEmpty(Model.CoverLetter))
+            {
+                <div class="detail-section">
+                    <h3 class="section-title">Cover Letter</h3>
+                    <div class="detail-text">@Html.Raw(Model.CoverLetter.Replace("\n", "<br/>"))</div>
+                </div>
+            }
+
+            @if (!string.IsNullOrEmpty(Model.Notes))
+            {
+                <div class="detail-section">
+                    <h3 class="section-title">Internal Notes</h3>
+                    <div class="detail-text notes-box">@Model.Notes</div>
+                </div>
+            }
+        </div>
+
+        <div class="detail-sidebar">
+            <div class="sidebar-card">
+                <h3 class="section-title">Application Details</h3>
+                <div class="info-list">
+                    <div class="info-item">
+                        <span class="info-label">Applied Date</span>
+                        <span class="info-value">@Model.AppliedDate.ToString("MMMM d, yyyy")</span>
+                    </div>
+                    @if (Model.InterviewDate.HasValue)
+                    {
+                        <div class="info-item">
+                            <span class="info-label">Interview</span>
+                            <span class="info-value">@Model.InterviewDate.Value.ToString("MMM d, yyyy h:mm tt")</span>
+                        </div>
+                    }
+                    <div class="info-item">
+                        <span class="info-label">Current Status</span>
+                        <span class="info-value"><span class="badge badge-@Model.Status.ToLower().Replace(" ", "-")">@Model.Status</span></span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="sidebar-card">
+                <h3 class="section-title">Candidate Info</h3>
+                <div class="info-list">
+                    <div class="info-item">
+                        <span class="info-label">Name</span>
+                        <span class="info-value"><a asp-controller="Candidates" asp-action="Details" asp-route-id="@Model.CandidateId" class="table-link">@Model.Candidate?.FullName</a></span>
+                    </div>
+                    <div class="info-item">
+                        <span class="info-label">Email</span>
+                        <span class="info-value">@Model.Candidate?.Email</span>
+                    </div>
+                    <div class="info-item">
+                        <span class="info-label">Experience</span>
+                        <span class="info-value">@Model.Candidate?.YearsOfExperience years</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="sidebar-card">
+                <h3 class="section-title">Job Posting</h3>
+                <div class="info-list">
+                    <div class="info-item">
+                        <span class="info-label">Title</span>
+                        <span class="info-value"><a asp-controller="JobPostings" asp-action="Details" asp-route-id="@Model.JobPostingId" class="table-link">@Model.JobPosting?.Title</a></span>
+                    </div>
+                    <div class="info-item">
+                        <span class="info-label">Department</span>
+                        <span class="info-value">@Model.JobPosting?.Department</span>
+                    </div>
+                    <div class="info-item">
+                        <span class="info-label">Location</span>
+                        <span class="info-value">@Model.JobPosting?.Location</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="back-link">
+        <a asp-action="Index" class="btn-ghost">← Back to Applications</a>
+    </div>
+</div>

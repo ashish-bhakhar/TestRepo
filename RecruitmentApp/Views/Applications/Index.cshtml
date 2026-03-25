@@ -1,0 +1,72 @@
+@model IEnumerable<RecruitmentApp.Models.Application>
+@{
+    ViewData["Title"] = "Applications";
+    var statuses = new[] { "Applied", "Under Review", "Interview", "Offered", "Hired", "Rejected" };
+}
+
+<div class="page-toolbar">
+    <form method="get" class="search-form">
+        <div class="search-wrap">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+            <input type="text" name="search" value="@ViewBag.CurrentSearch" placeholder="Search applications..." class="search-input" />
+        </div>
+        <div class="filter-tabs">
+            <a href="?search=@ViewBag.CurrentSearch" class="filter-tab @(string.IsNullOrEmpty(ViewBag.CurrentStatus?.ToString()) ? "active" : "")">All</a>
+            @foreach (var s in statuses)
+            {
+                <a href="?status=@s&search=@ViewBag.CurrentSearch" class="filter-tab @(ViewBag.CurrentStatus == s ? "active" : "")">@s</a>
+            }
+        </div>
+    </form>
+    <a asp-action="Create" class="btn-primary">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" width="14" height="14"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+        New Application
+    </a>
+</div>
+
+<div class="table-card">
+    <table class="data-table">
+        <thead>
+            <tr>
+                <th>Candidate</th>
+                <th>Position</th>
+                <th>Applied</th>
+                <th>Status</th>
+                <th>Interview Date</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var app in Model)
+            {
+                <tr>
+                    <td>
+                        <div style="display:flex; align-items:center; gap:10px;">
+                            <div class="app-avatar small">@app.Candidate?.FirstName[0]@app.Candidate?.LastName[0]</div>
+                            <a asp-controller="Candidates" asp-action="Details" asp-route-id="@app.CandidateId" class="table-link">@app.Candidate?.FullName</a>
+                        </div>
+                    </td>
+                    <td><a asp-controller="JobPostings" asp-action="Details" asp-route-id="@app.JobPostingId" class="table-link">@app.JobPosting?.Title</a></td>
+                    <td class="text-muted">@app.AppliedDate.ToString("MMM d, yyyy")</td>
+                    <td><span class="badge badge-@app.Status.ToLower().Replace(" ", "-")">@app.Status</span></td>
+                    <td class="text-muted">@(app.InterviewDate.HasValue ? app.InterviewDate.Value.ToString("MMM d, yyyy") : "—")</td>
+                    <td>
+                        <div class="action-group">
+                            <a asp-action="Details" asp-route-id="@app.Id" class="btn-action">View</a>
+                            <a asp-action="Edit" asp-route-id="@app.Id" class="btn-action">Edit</a>
+                            <form asp-action="Delete" method="post" style="display:inline" onsubmit="return confirm('Delete this application?')">
+                                @Html.AntiForgeryToken()
+                                <input type="hidden" name="id" value="@app.Id" />
+                                <button type="submit" class="btn-action danger">Delete</button>
+                            </form>
+                        </div>
+                    </td>
+                </tr>
+            }
+            @if (!Model.Any())
+            {
+                <tr><td colspan="6" class="empty-row">No applications found.</td></tr>
+            }
+        </tbody>
+    </table>
+</div>

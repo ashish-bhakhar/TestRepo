@@ -1,0 +1,145 @@
+@model RecruitmentApp.Models.Candidate
+@{
+    ViewData["Title"] = Model.FullName;
+}
+
+<div class="detail-page">
+    <div class="detail-header">
+        <div class="detail-title-group">
+            <div style="display:flex; align-items:center; gap:20px;">
+                <div class="candidate-avatar large">@Model.FirstName[0]@Model.LastName[0]</div>
+                <div>
+                    <h1 class="detail-title">@Model.FullName</h1>
+                    <div class="detail-meta">
+                        @if (!string.IsNullOrEmpty(Model.CurrentTitle))
+                        {
+                            <span class="tag">@Model.CurrentTitle</span>
+                        }
+                        <span class="text-muted">@Model.YearsOfExperience years experience</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="detail-actions">
+            <a asp-action="Edit" asp-route-id="@Model.Id" class="btn-primary">Edit Profile</a>
+            <a asp-controller="Applications" asp-action="Create" asp-route-candidateId="@Model.Id" class="btn-ghost">+ New Application</a>
+        </div>
+    </div>
+
+    <div class="detail-grid">
+        <div class="detail-main">
+            @if (!string.IsNullOrEmpty(Model.Skills))
+            {
+                <div class="detail-section">
+                    <h3 class="section-title">Skills</h3>
+                    <div class="skills-wrap large">
+                        @foreach (var skill in Model.Skills.Split(','))
+                        {
+                            <span class="skill-tag">@skill.Trim()</span>
+                        }
+                    </div>
+                </div>
+            }
+
+            <div class="detail-section">
+                <h3 class="section-title">Applications (@Model.Applications.Count)</h3>
+                @if (Model.Applications.Any())
+                {
+                    <div class="table-card">
+                        <table class="data-table">
+                            <thead>
+                                <tr>
+                                    <th>Position</th>
+                                    <th>Applied</th>
+                                    <th>Status</th>
+                                    <th>Interview</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach (var app in Model.Applications.OrderByDescending(a => a.AppliedDate))
+                                {
+                                    <tr>
+                                        <td><a asp-controller="JobPostings" asp-action="Details" asp-route-id="@app.JobPostingId" class="table-link">@app.JobPosting?.Title</a></td>
+                                        <td class="text-muted">@app.AppliedDate.ToString("MMM d, yyyy")</td>
+                                        <td><span class="badge badge-@app.Status.ToLower().Replace(" ", "-")">@app.Status</span></td>
+                                        <td class="text-muted">@(app.InterviewDate.HasValue ? app.InterviewDate.Value.ToString("MMM d") : "—")</td>
+                                        <td><a asp-controller="Applications" asp-action="Details" asp-route-id="@app.Id" class="btn-action">View</a></td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                }
+                else
+                {
+                    <p class="empty-text">No applications yet.</p>
+                }
+            </div>
+
+            @if (!string.IsNullOrEmpty(Model.Notes))
+            {
+                <div class="detail-section">
+                    <h3 class="section-title">Notes</h3>
+                    <div class="detail-text">@Model.Notes</div>
+                </div>
+            }
+        </div>
+
+        <div class="detail-sidebar">
+            <div class="sidebar-card">
+                <h3 class="section-title">Contact Info</h3>
+                <div class="info-list">
+                    <div class="info-item">
+                        <span class="info-label">Email</span>
+                        <span class="info-value">@Model.Email</span>
+                    </div>
+                    @if (!string.IsNullOrEmpty(Model.Phone))
+                    {
+                        <div class="info-item">
+                            <span class="info-label">Phone</span>
+                            <span class="info-value">@Model.Phone</span>
+                        </div>
+                    }
+                    @if (!string.IsNullOrEmpty(Model.LinkedInUrl))
+                    {
+                        <div class="info-item">
+                            <span class="info-label">LinkedIn</span>
+                            <span class="info-value"><a href="https://@Model.LinkedInUrl" target="_blank" class="table-link">@Model.LinkedInUrl</a></span>
+                        </div>
+                    }
+                    @if (Model.HasUploadedResume)
+                    {
+                        <div class="info-item">
+                            <span class="info-label">Resume File</span>
+                            <span class="info-value">
+                                <a asp-action="DownloadResume" asp-route-id="@Model.Id" class="resume-download-link">
+                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="14" height="14">
+                                        <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+                                        <polyline points="14 2 14 8 20 8"/>
+                                    </svg>
+                                    @Model.ResumeFileName
+                                </a>
+                            </span>
+                        </div>
+                    }
+                    @if (!string.IsNullOrEmpty(Model.ResumeUrl))
+                    {
+                        <div class="info-item">
+                            <span class="info-label">Resume Link</span>
+                            <span class="info-value"><a href="@Model.ResumeUrl" target="_blank" class="table-link">View Resume</a></span>
+                        </div>
+                    }
+                    <div class="info-item">
+                        <span class="info-label">Registered</span>
+                        <span class="info-value">@Model.RegisteredDate.ToString("MMMM d, yyyy")</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="back-link">
+        <a asp-action="Index" class="btn-ghost">← Back to Candidates</a>
+    </div>
+</div>

@@ -1,0 +1,255 @@
+@model RecruitmentApp.Models.JobPosting
+@{
+    ViewData["Title"] = Model.Title;
+}
+
+<div class="detail-page">
+    <div class="detail-header">
+        <div class="detail-title-group">
+            <h1 class="detail-title">@Model.Title</h1>
+            <div class="detail-meta">
+                <span class="tag">@Model.Department</span>
+                <span class="text-muted">@Model.Location</span>
+                <span class="text-muted">@Model.EmploymentType</span>
+                @if (!string.IsNullOrEmpty(Model.SalaryRange))
+                {
+                    <span class="salary">@Model.SalaryRange</span>
+                }
+                <span class="badge badge-@Model.Status.ToLower()">@Model.Status</span>
+            </div>
+        </div>
+        <div class="detail-actions">
+            <a asp-action="Edit" asp-route-id="@Model.Id" class="btn-primary">Edit Posting</a>
+            <a asp-controller="Applications" asp-action="Create" asp-route-jobId="@Model.Id" class="btn-ghost">+ Add Application</a>
+        </div>
+    </div>
+
+    <div class="detail-grid">
+        <div class="detail-main">
+            <div class="detail-section">
+                <h3 class="section-title">Job Description</h3>
+                <div class="detail-text">@Html.Raw(Model.Description.Replace("\n", "<br/>"))</div>
+            </div>
+            <div class="detail-section">
+                <h3 class="section-title">Requirements</h3>
+                <ul class="req-list">
+                    @foreach (var req in Model.Requirements.Split('\n', StringSplitOptions.RemoveEmptyEntries))
+                    {
+                        <li>@req.Trim()</li>
+                    }
+                </ul>
+            </div>
+
+            <!-- Resume Upload Section -->
+            <div class="detail-section">
+                <div class="panel-header">
+                    <h3 class="section-title">Submitted Resumes (@Model.Resumes.Count)</h3>
+                </div>
+                
+                <!-- Upload Form -->
+                <form asp-action="UploadResumes" method="post" enctype="multipart/form-data" class="upload-form">
+                    @Html.AntiForgeryToken()
+                    <input type="hidden" name="id" value="@Model.Id" />
+                    
+                    <div class="upload-area">
+                        <div class="upload-icon">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="32" height="32">
+                                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+                                <polyline points="17 8 12 3 7 8"/>
+                                <line x1="12" y1="3" x2="12" y2="15"/>
+                            </svg>
+                        </div>
+                        <div class="upload-text">
+                            <label for="resumeFiles" class="upload-label">
+                                <strong>Click to upload</strong> or drag and drop
+                            </label>
+                            <p class="upload-hint">PDF, DOC, DOCX (max 10MB each)</p>
+                        </div>
+                        <input type="file" id="resumeFiles" name="resumes" accept=".pdf,.doc,.docx" multiple class="file-input" />
+                    </div>
+                    
+                    <div class="form-grid" style="margin-top: 16px;">
+                        <div class="form-group">
+                            <label class="form-label">Candidate Name (Optional)</label>
+                            <input type="text" name="candidateName" class="form-control" placeholder="e.g. John Smith" />
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Candidate Email (Optional)</label>
+                            <input type="email" name="candidateEmail" class="form-control" placeholder="e.g. john@email.com" />
+                        </div>
+                    </div>
+                    
+                    <div style="margin-top: 16px;">
+                        <button type="submit" class="btn-primary">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" width="14" height="14">
+                                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+                                <polyline points="17 8 12 3 7 8"/>
+                                <line x1="12" y1="3" x2="12" y2="15"/>
+                            </svg>
+                            Upload Resume(s)
+                        </button>
+                        <span class="selected-files" style="margin-left: 12px; color: var(--text-muted); font-size: 13px;"></span>
+                    </div>
+                </form>
+
+                <!-- Resume List -->
+                @if (Model.Resumes.Any())
+                {
+                    <div class="resume-list">
+                        @foreach (var resume in Model.Resumes.OrderByDescending(r => r.UploadedDate))
+                        {
+                            <div class="resume-item">
+                                <div class="resume-icon">
+                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="18" height="18">
+                                        <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+                                        <polyline points="14 2 14 8 20 8"/>
+                                    </svg>
+                                </div>
+                                <div class="resume-info">
+                                    <div class="resume-name">@resume.FileName</div>
+                                    <div class="resume-meta">
+                                        @if (!string.IsNullOrEmpty(resume.CandidateName))
+                                        {
+                                            <span>@resume.CandidateName</span>
+                                            <span class="meta-sep">•</span>
+                                        }
+                                        <span>@((resume.FileSize / 1024.0).ToString("F1")) KB</span>
+                                        <span class="meta-sep">•</span>
+                                        <span>@resume.UploadedDate.ToString("MMM d, yyyy")</span>
+                                    </div>
+                                </div>
+                                <div class="resume-actions">
+                                    <a asp-action="DownloadResume" asp-route-id="@resume.Id" class="btn-action">
+                                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="14" height="14">
+                                            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+                                            <polyline points="7 10 12 15 17 10"/>
+                                            <line x1="12" y1="15" x2="12" y2="3"/>
+                                        </svg>
+                                        Download
+                                    </a>
+                                    <form asp-action="DeleteResume" method="post" style="display:inline" onsubmit="return confirm('Delete this resume?')">
+                                        @Html.AntiForgeryToken()
+                                        <input type="hidden" name="id" value="@resume.Id" />
+                                        <button type="submit" class="btn-action danger">Delete</button>
+                                    </form>
+                                </div>
+                            </div>
+                        }
+                    </div>
+                }
+                else
+                {
+                    <p class="empty-text" style="margin-top: 20px;">No resumes uploaded yet.</p>
+                }
+            </div>
+        </div>
+
+        <div class="detail-sidebar">
+            <div class="sidebar-card">
+                <h3 class="section-title">Job Details</h3>
+                <div class="info-list">
+                    <div class="info-item">
+                        <span class="info-label">Posted</span>
+                        <span class="info-value">@Model.PostedDate.ToString("MMMM d, yyyy")</span>
+                    </div>
+                    @if (Model.ClosingDate.HasValue)
+                    {
+                        <div class="info-item">
+                            <span class="info-label">Closes</span>
+                            <span class="info-value">@Model.ClosingDate.Value.ToString("MMMM d, yyyy")</span>
+                        </div>
+                    }
+                    <div class="info-item">
+                        <span class="info-label">Applications</span>
+                        <span class="info-value">@Model.Applications.Count total</span>
+                    </div>
+                    <div class="info-item">
+                        <span class="info-label">Resumes</span>
+                        <span class="info-value">@Model.Resumes.Count uploaded</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="sidebar-card">
+                <div class="panel-header">
+                    <h3 class="section-title">Applicants</h3>
+                    <a asp-controller="Applications" asp-action="Create" asp-route-jobId="@Model.Id" class="panel-link">+ Add</a>
+                </div>
+                @if (Model.Applications.Any())
+                {
+                    <div class="app-list compact">
+                        @foreach (var app in Model.Applications.OrderByDescending(a => a.AppliedDate))
+                        {
+                            <div class="app-row">
+                                <div class="app-avatar small">@app.Candidate?.FirstName[0]@app.Candidate?.LastName[0]</div>
+                                <div class="app-info">
+                                    <div class="app-name">@app.Candidate?.FullName</div>
+                                    <div class="app-job">Applied @app.AppliedDate.ToString("MMM d")</div>
+                                </div>
+                                <span class="badge badge-@app.Status.ToLower().Replace(" ", "-")">@app.Status</span>
+                            </div>
+                        }
+                    </div>
+                }
+                else
+                {
+                    <p class="empty-text">No applicants yet.</p>
+                }
+            </div>
+        </div>
+    </div>
+
+    <div class="back-link">
+        <a asp-action="Index" class="btn-ghost">← Back to Job Postings</a>
+    </div>
+</div>
+
+<script>
+    // File input handling
+    const fileInput = document.getElementById('resumeFiles');
+    const selectedFilesSpan = document.querySelector('.selected-files');
+    
+    fileInput.addEventListener('change', function() {
+        const count = this.files.length;
+        if (count > 0) {
+            selectedFilesSpan.textContent = `${count} file${count > 1 ? 's' : ''} selected`;
+        } else {
+            selectedFilesSpan.textContent = '';
+        }
+    });
+    
+    // Drag and drop
+    const uploadArea = document.querySelector('.upload-area');
+    
+    ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
+        uploadArea.addEventListener(eventName, preventDefaults, false);
+    });
+    
+    function preventDefaults(e) {
+        e.preventDefault();
+        e.stopPropagation();
+    }
+    
+    ['dragenter', 'dragover'].forEach(eventName => {
+        uploadArea.addEventListener(eventName, () => {
+            uploadArea.style.borderColor = 'var(--gold)';
+            uploadArea.style.background = 'var(--gold-dim)';
+        });
+    });
+    
+    ['dragleave', 'drop'].forEach(eventName => {
+        uploadArea.addEventListener(eventName, () => {
+            uploadArea.style.borderColor = '';
+            uploadArea.style.background = '';
+        });
+    });
+    
+    uploadArea.addEventListener('drop', (e) => {
+        const dt = e.dataTransfer;
+        const files = dt.files;
+        fileInput.files = files;
+        
+        const event = new Event('change', { bubbles: true });
+        fileInput.dispatchEvent(event);
+    });
+</script>
