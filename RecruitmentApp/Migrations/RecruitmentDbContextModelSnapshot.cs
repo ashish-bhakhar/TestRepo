@@ -83,6 +83,10 @@ namespace RecruitmentApp.Migrations
                         .HasMaxLength(100)
                         .HasColumnType("nvarchar(100)");
 
+                    b.Property<string>("MiddleName")
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
+
                     b.Property<string>("LinkedInUrl")
                         .HasColumnType("nvarchar(max)");
 
