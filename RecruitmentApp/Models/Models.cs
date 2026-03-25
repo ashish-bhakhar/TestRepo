@@ -74,6 +74,10 @@ namespace RecruitmentApp.Models
         [Display(Name = "Last Name")]
         public string LastName { get; set; } = string.Empty;
 
+        [MaxLength(100)]
+        [Display(Name = "Middle Name")]
+        public string? MiddleName { get; set; }
+
         [Required, EmailAddress]
         public string Email { get; set; } = string.Empty;
 
@@ -107,7 +111,14 @@ namespace RecruitmentApp.Models
 
         public ICollection<Application> Applications { get; set; } = new List<Application>();
 
-        public string FullName => $"{FirstName} {LastName}";
+        public string FullName
+        {
+            get
+            {
+                var middle = string.IsNullOrWhiteSpace(MiddleName) ? null : MiddleName.Trim();
+                return middle is null ? $"{FirstName} {LastName}" : $"{FirstName} {middle} {LastName}";
+            }
+        }
         
         public bool HasUploadedResume => !string.IsNullOrEmpty(ResumeFilePath);
     }
