@@ -119,8 +119,7 @@ namespace RecruitmentApp.Models
                 return middle is null ? $"{FirstName} {LastName}" : $"{FirstName} {middle} {LastName}";
             }
         }
-        //public string FullName => $"{FirstName} {LastName}";
-        
+
         public bool HasUploadedResume => !string.IsNullOrEmpty(ResumeFilePath);
     }
 

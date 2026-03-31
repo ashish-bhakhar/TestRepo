@@ -21,9 +21,6 @@ namespace RecruitmentApp.Controllers
         {
             var query = _context.Candidates.Include(c => c.Applications).AsQueryable();
 
-
-            string test = "test";
-
             if (!string.IsNullOrEmpty(search))
                 query = query.Where(c => c.FirstName.Contains(search) ||
                                          c.LastName.Contains(search) ||
